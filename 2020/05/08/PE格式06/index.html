@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PE," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="动态装载这一节我们将动态装载一个可执行文件到内存中，目的是在另一个可执行文件中运行被动态装载了PE结构等相关数据的程序。 原理是利用PE结构，将PE结构的头部信息从源可执行文件的FA装载入另一个已经在运行状态的进程虚拟内存中，亦即VA中，除了头部信息之外，我们还要做的是修改IAT项数据，因为要修改IAT数据，我们还要获取导入表相关信息，获取源可执行文件的节表项，通过节表获取需要加载的动态库，然后通">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PE格式06">
+<meta property="og:url" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F06/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="动态装载这一节我们将动态装载一个可执行文件到内存中，目的是在另一个可执行文件中运行被动态装载了PE结构等相关数据的程序。 原理是利用PE结构，将PE结构的头部信息从源可执行文件的FA装载入另一个已经在运行状态的进程虚拟内存中，亦即VA中，除了头部信息之外，我们还要做的是修改IAT项数据，因为要修改IAT数据，我们还要获取导入表相关信息，获取源可执行文件的节表项，通过节表获取需要加载的动态库，然后通">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F06/image-20200507030154258.png">
+<meta property="article:published_time" content="2020-05-08T05:40:34.000Z">
+<meta property="article:modified_time" content="2020-05-08T05:46:10.824Z">
+<meta property="article:author" content="Joshua">
+<meta property="article:tag" content="PE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F06/image-20200507030154258.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://joshua.github.io/2020/05/08/PE格式06/"/>
+
+
+
+
+
+  <title>PE格式06 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F06/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Joshua">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PE格式06</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-08T13:40:34+08:00">
+                2020-05-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="动态装载"><a href="#动态装载" class="headerlink" title="动态装载"></a>动态装载</h3><p>这一节我们将动态装载一个可执行文件到内存中，目的是在另一个可执行文件中运行被动态装载了PE结构等相关数据的程序。</p>
+<p>原理是利用PE结构，将PE结构的头部信息从源可执行文件的FA装载入另一个已经在运行状态的进程虚拟内存中，亦即VA中，除了头部信息之外，我们还要做的是修改IAT项数据，因为要修改IAT数据，我们还要获取导入表相关信息，获取源可执行文件的节表项，通过节表获取需要加载的动态库，然后通过导入表项获取每个节要导入的函数VA，并写入到进程虚拟内存的IAT表项指向的地址下。</p>
+<a id="more"></a>
+
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F06/image-20200507030154258.png" alt="image-20200507030154258"></p>
+<p>运行fake.exe时，首先从xx.exe的目标可执行文件下读取头部数据、节表数据、导入表数据装载到fake.exe的内存中，置于内存什么地方呢？这个最好还是原封不动，与目标可执行文件加载到内存中最好一致，否则很可能就无法运行。所以首先得分析原可执行文件的ImageBase，并且还需要知道SizeOfImage，也就是程序运行起来后程序镜像在虚拟内存中的大小。有了这些信息之后，在我们的fake.exe的虚拟内存中就要为目标程序的执行腾出空间，最起码腾出SizeOfImage大小的空间的话在汇编下可以使用org SizeOfImage来指明，并且会初始化为0，并且还要设定提前占用基址（ImageBase），这是给目标程序占用的，这样的话我们编写的代码就会在ImageBase+SizeOfImage之后，在ImageBase到ImageBase+SizeOfImage，将在我们做完准备工作后给目标程序使用。</p>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>在代码段的最上部腾出IMAGE_SIZE空间：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.code</span><br><span class="line">  org IMAGE_SIZE</span><br></pre></td></tr></table></figure>
+
+<p>并且设置程序基址，在链接器选项下设置，假设要设置的程序基址为0x400000（与目标程序的基址一致）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;base:0x400000</span><br></pre></td></tr></table></figure>
+
+<p>初始化时首先修改这部分代码数据可读写可执行，因为我们要在这块区域写入目标程序的数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">start proc</span><br><span class="line">  LOCAL @hInst:HMODULE</span><br><span class="line">  LOCAL @dwOld:DWORD</span><br><span class="line"></span><br><span class="line">  invoke GetModuleHandle, NULL</span><br><span class="line">  mov @hInst, eax</span><br><span class="line">  </span><br><span class="line">  invoke VirtualProtect, @hInst, IMAGE_SIZE, PAGE_EXECUTE_READWRITE, addr @dwOld</span><br><span class="line">  ; check it</span><br><span class="line">  </span><br><span class="line">  invoke LoadPE, @hInst, offset g_szFilePath</span><br><span class="line"></span><br><span class="line">  ret</span><br><span class="line">start endp</span><br><span class="line"></span><br><span class="line">end start</span><br></pre></td></tr></table></figure>
+
+<p>然后编写LoadPE函数来加载目标可执行文件的PE头到我们程序的虚拟内存中，需要注意FA与VA的转换，这个函数将目标可执行文件映射到内存并获取在内存中的地址，下一步通过这个地址获取PE结构信息，写入到我们程序的虚拟内存中：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">LoadPE proc uses esi lpBase:LPVOID, szFilePath:LPSTR</span><br><span class="line">  LOCAL @hFile:HANDLE</span><br><span class="line">  LOCAL @hMapFile:HANDLE</span><br><span class="line">  LOCAL @lpMapAddress:LPVOID</span><br><span class="line">  </span><br><span class="line">  mov @hFile, INVALID_HANDLE_VALUE</span><br><span class="line">  xor eax, eax</span><br><span class="line">  mov @hMapFile, eax</span><br><span class="line">  mov @lpMapAddress, eax</span><br><span class="line">  </span><br><span class="line">  invoke CreateFile, szFilePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL</span><br><span class="line">  .if eax &#x3D;&#x3D;  INVALID_HANDLE_VALUE</span><br><span class="line">    jmp EXIT_PROC</span><br><span class="line">  .endif</span><br><span class="line">  mov @hFile, eax</span><br><span class="line">  </span><br><span class="line">  invoke CreateFileMapping, @hFile, NULL, PAGE_READONLY, 0, 0, NULL</span><br><span class="line">  .if eax &#x3D;&#x3D;  NULL</span><br><span class="line">    jmp EXIT_PROC</span><br><span class="line">  .endif</span><br><span class="line">  mov @hMapFile, eax</span><br><span class="line">  </span><br><span class="line">  invoke MapViewOfFile, @hMapFile, FILE_MAP_READ, 0, 0, 0      </span><br><span class="line">  .if eax &#x3D;&#x3D;  NULL</span><br><span class="line">    jmp EXIT_PROC</span><br><span class="line">  .endif</span><br><span class="line">  mov @lpMapAddress, eax</span><br><span class="line">  </span><br><span class="line">  invoke IsPeFile, @lpMapAddress</span><br><span class="line">  .if eax &#x3D;&#x3D; FALSE</span><br><span class="line">    jmp EXIT_PROC</span><br><span class="line">  .endif</span><br><span class="line"></span><br><span class="line">  invoke _Loader, lpBase, @lpMapAddress</span><br><span class="line">  </span><br><span class="line">EXIT_PROC:</span><br><span class="line">  .if @lpMapAddress !&#x3D; NULL</span><br><span class="line">    invoke UnmapViewOfFile, @lpMapAddress</span><br><span class="line">    .if eax &#x3D;&#x3D; NULL</span><br><span class="line">      ; run error proc</span><br><span class="line">    .endif</span><br><span class="line">    mov @lpMapAddress, NULL</span><br><span class="line">  .endif</span><br><span class="line"></span><br><span class="line">  .if @hMapFile !&#x3D; NULL</span><br><span class="line">    invoke CloseHandle, @hMapFile</span><br><span class="line">    mov @hMapFile, NULL</span><br><span class="line">  .endif</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  .if @hFile !&#x3D; INVALID_HANDLE_VALUE</span><br><span class="line">    invoke CloseHandle, @hFile</span><br><span class="line">    mov @hFile, INVALID_HANDLE_VALUE</span><br><span class="line">  .endif</span><br><span class="line">  </span><br><span class="line">  ret</span><br><span class="line"></span><br><span class="line">LoadPE endp</span><br></pre></td></tr></table></figure>
+
+<p>开始写入头部数据，节表数据与导入表数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">_Loader proc uses esi ebx lpDst:LPVOID, lpSrc:LPVOID</span><br><span class="line">  LOCAL @dwNumberOfSections:DWORD</span><br><span class="line">  LOCAL @dwSizeOfOptionalHeader:DWORD</span><br><span class="line">  LOCAL @lpEntryPoint:LPVOID</span><br><span class="line">  LOCAL @dwSizeOfHeaders:DWORD</span><br><span class="line">  LOCAL @lpImport:LPVOID</span><br><span class="line">  LOCAL @lpDataDirectory:LPVOID</span><br><span class="line">  </span><br><span class="line">  xor eax, eax</span><br><span class="line">  mov @dwNumberOfSections, eax</span><br><span class="line">  mov @dwSizeOfOptionalHeader, eax</span><br><span class="line">  mov @lpEntryPoint, eax</span><br><span class="line">  mov @dwSizeOfHeaders, eax</span><br><span class="line">  mov @lpImport, eax</span><br><span class="line">  mov @lpDataDirectory, eax</span><br><span class="line"></span><br><span class="line">  mov esi, lpSrc</span><br><span class="line">  assume esi : ptr IMAGE_DOS_HEADER</span><br><span class="line">  </span><br><span class="line">  add esi, [esi].e_lfanew</span><br><span class="line">  assume esi : ptr IMAGE_NT_HEADERS</span><br><span class="line">  </span><br><span class="line">  movzx eax, [esi].FileHeader.NumberOfSections</span><br><span class="line">  mov @dwNumberOfSections, eax</span><br><span class="line">  </span><br><span class="line">  movzx eax, [esi].FileHeader.SizeOfOptionalHeader</span><br><span class="line">  mov @dwSizeOfOptionalHeader, eax</span><br><span class="line">  </span><br><span class="line">  mov eax, [esi].OptionalHeader.AddressOfEntryPoint</span><br><span class="line">  add eax, lpDst</span><br><span class="line">  mov @lpEntryPoint, eax</span><br><span class="line">  </span><br><span class="line">  mov eax, [esi].OptionalHeader.SizeOfHeaders</span><br><span class="line">  mov @dwSizeOfHeaders, eax</span><br><span class="line">  </span><br><span class="line">  lea eax, [esi].OptionalHeader.DataDirectory</span><br><span class="line">  mov @lpDataDirectory, eax</span><br><span class="line">  </span><br><span class="line">  lea eax, [esi].OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT * sizeof IMAGE_DATA_DIRECTORY]</span><br><span class="line">  assume eax : ptr IMAGE_DATA_DIRECTORY</span><br><span class="line">  mov eax, [eax].VirtualAddress</span><br><span class="line">  add eax, lpDst</span><br><span class="line">  mov @lpImport, eax  ; get import table in memory address</span><br><span class="line"></span><br><span class="line">  ;拷贝整个头部信息</span><br><span class="line">  invoke crt_memcpy, lpDst, lpSrc, @dwSizeOfHeaders</span><br><span class="line">  </span><br><span class="line">  lea ebx, [esi].OptionalHeader</span><br><span class="line">  add ebx, @dwSizeOfOptionalHeader</span><br><span class="line">  assume ebx : ptr IMAGE_SECTION_HEADER</span><br><span class="line">  </span><br><span class="line">  xor ecx, ecx</span><br><span class="line">  .while ecx &lt; @dwNumberOfSections</span><br><span class="line">    </span><br><span class="line">    .if [ebx].SizeOfRawData !&#x3D; 0</span><br><span class="line">      mov esi, [ebx].PointerToRawData</span><br><span class="line">      add esi, lpSrc</span><br><span class="line">      </span><br><span class="line">      mov edi, [ebx].VirtualAddress</span><br><span class="line">      add edi, lpDst</span><br><span class="line">      </span><br><span class="line">      push ecx</span><br><span class="line">      ;拷贝节表数据</span><br><span class="line">      invoke crt_memcpy, edi, esi, [ebx].SizeOfRawData</span><br><span class="line">      pop ecx</span><br><span class="line">      </span><br><span class="line">    .endif</span><br><span class="line"></span><br><span class="line">    add ebx, sizeof IMAGE_SECTION_HEADER</span><br><span class="line">    inc ecx</span><br><span class="line">  .endw</span><br><span class="line">  </span><br><span class="line">  ;导入表</span><br><span class="line">  invoke ImportProc, lpDst, @lpImport</span><br><span class="line">  </span><br><span class="line">  jmp @lpEntryPoint</span><br><span class="line">  </span><br><span class="line">  ret</span><br><span class="line"></span><br><span class="line">_Loader endp</span><br></pre></td></tr></table></figure>
+
+<p>接着通过导入表剔除无效的导入表项，并加载有效导入表项的dll，然后通过OriginalFirstThunk或者FirstThunk获取要加载的函数的地址：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">ImportProc proc uses esi hInst:LPVOID, lpImport:LPVOID</span><br><span class="line">  LOCAL @hDllInst : HMODULE</span><br><span class="line">  LOCAL @lpApiInfo:LPVOID</span><br><span class="line">  LOCAL @lpIAT:LPVOID</span><br><span class="line">  </span><br><span class="line">  xor eax, eax</span><br><span class="line">  mov @hDllInst, eax</span><br><span class="line">  mov @lpApiInfo, eax</span><br><span class="line">  mov @lpIAT, eax</span><br><span class="line">  </span><br><span class="line">  mov esi, lpImport</span><br><span class="line">  assume esi : ptr IMAGE_IMPORT_DESCRIPTOR</span><br><span class="line">  </span><br><span class="line">  .while [esi].Name1 !&#x3D; NULL</span><br><span class="line">    mov eax, [esi].FirstThunk</span><br><span class="line">    add eax, hInst</span><br><span class="line">    .if dword ptr [eax] &#x3D;&#x3D; NULL ; 处理无效的导入表项</span><br><span class="line">      add esi, sizeof IMAGE_IMPORT_DESCRIPTOR</span><br><span class="line">      .continue</span><br><span class="line">    .endif</span><br><span class="line"></span><br><span class="line">    mov eax, [esi].Name1</span><br><span class="line">    add eax, hInst</span><br><span class="line">    invoke LoadLibrary, eax</span><br><span class="line">    ; check it</span><br><span class="line">    mov @hDllInst, eax</span><br><span class="line">    </span><br><span class="line">    mov eax, [esi].OriginalFirstThunk</span><br><span class="line">    .if eax &#x3D;&#x3D; NULL</span><br><span class="line">      mov eax, [esi].FirstThunk</span><br><span class="line">    .endif</span><br><span class="line">    add eax, hInst</span><br><span class="line">    mov @lpApiInfo, eax</span><br><span class="line">    </span><br><span class="line">    mov eax, [esi].FirstThunk</span><br><span class="line">    add eax, hInst</span><br><span class="line">    mov @lpIAT, eax</span><br><span class="line">    </span><br><span class="line">    invoke WriteToIAT, hInst, @hDllInst, @lpApiInfo, @lpIAT</span><br><span class="line">    </span><br><span class="line">    add esi, sizeof IMAGE_IMPORT_DESCRIPTOR</span><br><span class="line">  .endw</span><br><span class="line"></span><br><span class="line">  ret</span><br><span class="line"></span><br><span class="line">ImportProc endp</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PE/" rel="tag"># PE</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/" rel="next" title="PE格式05">
+                <i class="fa fa-chevron-left"></i> PE格式05
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F07/" rel="prev" title="PE格式07">
+                PE格式07 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Joshua</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#动态装载"><span class="nav-number">1.</span> <span class="nav-text">动态装载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#准备工作"><span class="nav-number">2.</span> <span class="nav-text">准备工作</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Joshua</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

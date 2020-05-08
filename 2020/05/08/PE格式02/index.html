@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="上一节用到了IMAGE_NT_HEADER结构体，该结构体中包含了IMAGE_FILE_HEADER和IMAGE_OPTIONAL_HEADER，其实IMAGE_FILE_HEADER还远不够来描述PE文件的属性，因此这些属性在IMAGE_OPTIONAL_HEADER中进行了定义，两个结构体联合起来，构成一个完整的”PE文件结构”。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PE格式02">
+<meta property="og:url" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="上一节用到了IMAGE_NT_HEADER结构体，该结构体中包含了IMAGE_FILE_HEADER和IMAGE_OPTIONAL_HEADER，其实IMAGE_FILE_HEADER还远不够来描述PE文件的属性，因此这些属性在IMAGE_OPTIONAL_HEADER中进行了定义，两个结构体联合起来，构成一个完整的”PE文件结构”。">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054648968.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054736322.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054826024.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055153620.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055205878.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055218255.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055412464.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055811560.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055947661.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430063726569.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430065908444.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070056704.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070224640.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070401455.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070522043.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070629430.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430071807421.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070849151.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430071409769.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430071359837.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072307003.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072716897.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072841671.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072927230.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430073006962.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430073143105.png">
+<meta property="article:published_time" content="2020-05-08T05:38:02.000Z">
+<meta property="article:modified_time" content="2020-05-08T05:39:25.342Z">
+<meta property="article:author" content="Joshua">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054648968.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://joshua.github.io/2020/05/08/PE格式02/"/>
+
+
+
+
+
+  <title>PE格式02 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Joshua">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PE格式02</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-08T13:38:02+08:00">
+                2020-05-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上一节用到了IMAGE_NT_HEADER结构体，该结构体中包含了IMAGE_FILE_HEADER和IMAGE_OPTIONAL_HEADER，其实IMAGE_FILE_HEADER还远不够来描述PE文件的属性，因此这些属性在IMAGE_OPTIONAL_HEADER中进行了定义，两个结构体联合起来，构成一个完整的”PE文件结构”。</p>
+<a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">typedef struct _IMAGE_OPTIONAL_HEADER &#123;</span><br><span class="line">    &#x2F;&#x2F;</span><br><span class="line">    &#x2F;&#x2F; Standard fields.</span><br><span class="line">    &#x2F;&#x2F;</span><br><span class="line"></span><br><span class="line">    WORD    Magic;</span><br><span class="line">    BYTE    MajorLinkerVersion;</span><br><span class="line">    BYTE    MinorLinkerVersion;</span><br><span class="line">    DWORD   SizeOfCode;</span><br><span class="line">    DWORD   SizeOfInitializedData;</span><br><span class="line">    DWORD   SizeOfUninitializedData;</span><br><span class="line">    DWORD   AddressOfEntryPoint;</span><br><span class="line">    DWORD   BaseOfCode;</span><br><span class="line">    DWORD   BaseOfData;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;</span><br><span class="line">    &#x2F;&#x2F; NT additional fields.</span><br><span class="line">    &#x2F;&#x2F;</span><br><span class="line"></span><br><span class="line">    DWORD   ImageBase;</span><br><span class="line">    DWORD   SectionAlignment;</span><br><span class="line">    DWORD   FileAlignment;</span><br><span class="line">    WORD    MajorOperatingSystemVersion;</span><br><span class="line">    WORD    MinorOperatingSystemVersion;</span><br><span class="line">    WORD    MajorImageVersion;</span><br><span class="line">    WORD    MinorImageVersion;</span><br><span class="line">    WORD    MajorSubsystemVersion;</span><br><span class="line">    WORD    MinorSubsystemVersion;</span><br><span class="line">    DWORD   Win32VersionValue;</span><br><span class="line">    DWORD   SizeOfImage;</span><br><span class="line">    DWORD   SizeOfHeaders;</span><br><span class="line">    DWORD   CheckSum;</span><br><span class="line">    WORD    Subsystem;</span><br><span class="line">    WORD    DllCharacteristics;</span><br><span class="line">    DWORD   SizeOfStackReserve;</span><br><span class="line">    DWORD   SizeOfStackCommit;</span><br><span class="line">    DWORD   SizeOfHeapReserve;</span><br><span class="line">    DWORD   SizeOfHeapCommit;</span><br><span class="line">    DWORD   LoaderFlags;</span><br><span class="line">    DWORD   NumberOfRvaAndSizes;</span><br><span class="line">    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];</span><br><span class="line">&#125; IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;</span><br></pre></td></tr></table></figure>
+
+<p>如上就是可选头的结构体定义。使用CFF Explorer和WinHex来对照分析一个可执行文件，使用CFF随便打开一个exe文件，选择Optional Header项：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054648968.png" alt="image-20200430054648968"></p>
+<p>第一个成员Magic位于文件的D0偏移处，查看WinHex：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054736322.png" alt="image-20200430054736322"></p>
+<p>Magic的值为0x10b，其实该值在winnt.h中有定义：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430054826024.png" alt="image-20200430054826024"></p>
+<p>0x10b表示该程序是32位程序，0x20b则表示64位程序，而0x107则代表了是嵌入式程序，这个值是不可以修改的，修改完之后程序就无法运行，因为根据位数的不同，解析PE文件的方式也有所差别。</p>
+<p>并且在winnt.h的头文件下还可以发现三个结构体的前8个成员是一样定义的：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055153620.png" alt="image-20200430055153620"></p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055205878.png" alt="image-20200430055205878"></p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055218255.png" alt="image-20200430055218255"></p>
+<p>第二、三个成员是MajorLinkerVersion、MinorLinkerVersion表示链接程序是使用的链接去主副版本号，查看CFF：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055412464.png" alt="image-20200430055412464"></p>
+<p>表示链接器的版本号为5.12，而链接该程序的RadASM的链接器版本号正是该值：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055811560.png" alt="image-20200430055811560"></p>
+<p>这个值可以修改，不会影响程序正常运行。</p>
+<p>后面的SizeOfCode成员的值表示所有含代码的节的总大小，CFF显示为0x200：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430055947661.png" alt="image-20200430055947661"></p>
+<p>实际上代码占用不到0x200个字节：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430063726569.png" alt="image-20200430063726569"></p>
+<p>这是因为有个对齐属性在，可以看到还有个属性是文件对齐属性：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430065908444.png" alt="image-20200430065908444"></p>
+<p>其值为0x200，则表示一个段在文件中不超过0x200字节的按两百字节算，超过0x200则按0x200的整数倍分配。</p>
+<p>然后是SizeOfInitializedData字段，该字段表示已初始化的数据大小：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070056704.png" alt="image-20200430070056704"></p>
+<p>以及未初始化的数据大小：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070224640.png" alt="image-20200430070224640"></p>
+<p>这三个值可以随便改动，不会影响程序的正常运行。</p>
+<p>然后是<strong>AddressOfEntryPoint</strong>字段，该字段表示程序的入口点：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070401455.png" alt="image-20200430070401455"></p>
+<p>而实际上程序的入口点在0x00401000的位置：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070522043.png" alt="image-20200430070522043"></p>
+<p>这里就有个RVA、VA、FA的概念区分，<strong>AddressOfEntryPoint</strong>字段是RVA，表示相对虚拟地址，相对于ImageBase字段的地址：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070629430.png" alt="image-20200430070629430"></p>
+<p>ImageBase字段表示可执行文件加载进内存时镜像的第一个字节的首选地址，其必须是64K的倍数，DLL默认是0x10000000H。Windows CE的EXE默认是0x10000。Windows系列默认为0x400000：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430071807421.png" alt="image-20200430071807421"></p>
+<p>而相对于ImageBase的<strong>AddressOfEntryPoint</strong>才是真正的程序入口点，可以修改该入口点的值为文件中的其他位置，但是要确保最后跳回到OEP，这样就不会影响到程序的正常操作。</p>
+<p>而VA在这里就是0x00401000，而FA则是文件地址，例如WinHex可以看到的最左侧的数据偏移：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430070849151.png" alt="image-20200430070849151"></p>
+<p>BaseOfCode字段表示代码基址， 当镜像被加载进内存时代码节的开头RVA。必须是SectionAlignment的整数倍。 </p>
+<p>BaseOfData字段表示数据基址，当镜像被加载进内存时数据结构的开头RVA，必须是SectionAlignment的整数倍。 </p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430071409769.png" alt="image-20200430071409769"></p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430071359837.png" alt="image-20200430071359837"></p>
+<p> SectionAlignment表示当加载进内存时节的对齐值（以字节计），其必须&gt;= FileAlignment 。</p>
+<p> FileAlignment 为文件对齐粒度， 用来对齐镜像文件的节中的原始数据的对齐因子（以字节计）。 </p>
+<p>这两个值最好不要修改，与系统挂钩，修改了之后系统不承认就会导致程序运行不起来或者崩溃。</p>
+<p>然后是 MajorOperatingSystemVersion ，为主系统主版本号， MinorOperatingSystemVersion 为主系统此版本号， MajorImageVersion ，为镜像的主板本号， MinorImageVersion 为镜像的次版本号。这几个值可以随意修改，不影响程序正常运行。</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072307003.png" alt="image-20200430072307003"></p>
+<p>然后是 MajorSubsystemVersion 为子系统的主板本号，可以修改，但可能会导致程序崩溃，MinorSubsystemVersion为子系统此版本号。</p>
+<p>CheckSum字段为 镜像文件的校验和。计算校验和的算法被合并到了Imagehlp.DLL 中。以下程序在加载时被校验以确定其是否合法：所有的驱动程序、任何在引导时被加载的DLL以及加载进关键Windows进程中的DLL。 </p>
+<p> Subsystem字段为程序类型：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072716897.png" alt="image-20200430072716897"></p>
+<p>值为2表示Windows窗口程序，如果改成3就是控制台程序。</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072841671.png" alt="image-20200430072841671"></p>
+<p> DllCharacteristics 为Dll标识，如果该PE文件为DLL的话：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430072927230.png" alt="image-20200430072927230"></p>
+<p>可执行程序为0：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430073006962.png" alt="image-20200430073006962"></p>
+<p> SizeOfStackReserve 为栈保留大小，默认是1MB。</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F02/image-20200430073143105.png" alt="image-20200430073143105"></p>
+<p> SizeOfStackCommit 为栈提交大小，初始提交的栈大小，默认4KB。</p>
+<p> SizeOfHeapReserve 堆保留大小，最大堆大小，编译器分配，默认是1MB。</p>
+<p> SizeOfHeapCommit 堆提交大小，初始提交的局部堆控件大小，默认4KB。</p>
+<p> LoaderFlags 保留字段，必须为0。</p>
+<p> NumberOfRvaAndSizes 目录项数目，只能为16。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F01/" rel="next" title="PE格式01">
+                <i class="fa fa-chevron-left"></i> PE格式01
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F03/" rel="prev" title="PE格式03">
+                PE格式03 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Joshua</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Joshua</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PE," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="通过导入表项注入Dll假设有WinSDK程序如下： 123456789101112#include &quot;stdafx.h&quot;#include &quot;resource.h&quot;int APIENTRY WinMain(HINSTANCE hInstance,                     HINSTANCE hPrevInstance,                     LPSTR     lp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PE格式05">
+<meta property="og:url" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="通过导入表项注入Dll假设有WinSDK程序如下： 123456789101112#include &quot;stdafx.h&quot;#include &quot;resource.h&quot;int APIENTRY WinMain(HINSTANCE hInstance,                     HINSTANCE hPrevInstance,                     LPSTR     lp">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012036079.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012221884.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012814681.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013306955.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013427028.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013644951.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013825109.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506014113798.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506014527340.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506010933698.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011025898.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011242743.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011512520.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011607119.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506024747822.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506025004510.png">
+<meta property="article:published_time" content="2020-05-08T05:40:26.000Z">
+<meta property="article:modified_time" content="2020-05-08T05:44:56.149Z">
+<meta property="article:author" content="Joshua">
+<meta property="article:tag" content="PE">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012036079.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://joshua.github.io/2020/05/08/PE格式05/"/>
+
+
+
+
+
+  <title>PE格式05 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Joshua">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PE格式05</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-08T13:40:26+08:00">
+                2020-05-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="通过导入表项注入Dll"><a href="#通过导入表项注入Dll" class="headerlink" title="通过导入表项注入Dll"></a>通过导入表项注入Dll</h3><p>假设有WinSDK程序如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stdafx.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"resource.h"</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> APIENTRY <span class="title">WinMain</span><span class="params">(HINSTANCE hInstance,</span></span></span><br><span class="line"><span class="function"><span class="params">                     HINSTANCE hPrevInstance,</span></span></span><br><span class="line"><span class="function"><span class="params">                     LPSTR     lpCmdLine,</span></span></span><br><span class="line"><span class="function"><span class="params">                     <span class="keyword">int</span>       nCmdShow)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	MessageBox(<span class="literal">NULL</span>, <span class="string">"Hello World!"</span>, <span class="string">"Hello"</span>, MB_OK);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>该程序仅仅在运行时调用MessageBox函数弹一个框，编译运行后使用WinHex查看该生成的可执行文件，定位到导入表的RVA：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012036079.png" alt="image-20200506012036079"></p>
+<p>RVA值为0x2A000，继续查看该可执行文件的节表项，查看该RVA位于哪个节下，从而获取到FA：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012221884.png" alt="image-20200506012221884"></p>
+<p>其值位于.idata节下，且节表项的RVA(0x2A000)的FA为0x28000，那么就说明0x28000下存放的就是导入表数据，继续查看之：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506012814681.png" alt="image-20200506012814681"></p>
+<p>阴影高亮部分就是导入表数据，根据前面的知识一个导入表项栈0x14个字节，剔除最后一项全为0项的尾项，那么这里有2个导入表项，表明该程序从2个动态库里面导入了函数，现在我们要注入Dll的函数到该程序中，所以我们还要插入一个导入表项，但是这里空间不够了，如果继续填充这块数据，就会使得程序后面的数据遭到破坏，因此这里我们选择在0x28000~0x28FFF之前找找看有没有一块足够大的空间用来存放新的导入表项即额外数据（动态库名、函数名等数据），在0x28A20处有大量空白数据可以填入：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013306955.png" alt="image-20200506013306955"></p>
+<p>所以这里我们将0x28000下的2*0x14个数据全部填充到0x28A20处：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013427028.png" alt="image-20200506013427028"></p>
+<p>要让程序使用我们新开辟的导入表数据，还得修改PE头的数据目录结构体的导入表地址为该处，但是该处是FA，需要修改为RVA程序才可以使用，0x28000对应的RVA为0x2A000，那么0x28A20的RVA就是0x2AA20：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013644951.png" alt="image-20200506013644951"></p>
+<p>修改后程序依然可以正常运行。</p>
+<p>接下来需要往新的导入表后面添加我们的Dll库对应的函数了。</p>
+<p>首先编写Dll库的代码，并导出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.code</span><br><span class="line">ShowMsg proc hWnd:HWND, lpText:LPVOID, lpCaption:LPVOID, wType:WORD</span><br><span class="line">    </span><br><span class="line">    invoke MessageBox, hWnd, lpText, lpCaption, wType</span><br><span class="line">    </span><br><span class="line">    ret</span><br><span class="line">ShowMsg endp</span><br><span class="line"></span><br><span class="line">DllEntry proc _hInstance, _dwReason, _dwReserved</span><br><span class="line">    mov eax, TRUE</span><br><span class="line">    ret</span><br><span class="line"></span><br><span class="line">DllEntry endp</span><br><span class="line"></span><br><span class="line">end DllEntry</span><br></pre></td></tr></table></figure>
+
+<p>构建后生成Dll文件，并拷贝到可执行文件的目录下（可执行文件首先搜索当前目录）：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506013825109.png" alt="image-20200506013825109"></p>
+<p>然后继续使用WinHex添加导入表项，导入表项的结构体如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_IMPORT_DESCRIPTOR</span> &#123;</span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        DWORD   Characteristics;            <span class="comment">// 0 for terminating null import descriptor</span></span><br><span class="line">        DWORD   OriginalFirstThunk;         <span class="comment">// RVA to original unbound IAT (PIMAGE_THUNK_DATA)</span></span><br><span class="line">    &#125; DUMMYUNIONNAME;</span><br><span class="line">    DWORD   TimeDateStamp;                  <span class="comment">// 0 if not bound,</span></span><br><span class="line">    <span class="comment">// -1 if bound, and real date\time stamp</span></span><br><span class="line">    <span class="comment">//     in IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT (new BIND)</span></span><br><span class="line">    <span class="comment">// O.W. date/time stamp of DLL bound to (Old BIND)</span></span><br><span class="line"></span><br><span class="line">    DWORD   ForwarderChain;                 <span class="comment">// -1 if no forwarders</span></span><br><span class="line">    DWORD   Name;</span><br><span class="line">    DWORD   FirstThunk;                     <span class="comment">// RVA to IAT (if bound this IAT has actual addresses)</span></span><br><span class="line">&#125; IMAGE_IMPORT_DESCRIPTOR;</span><br></pre></td></tr></table></figure>
+
+<p>其中第一个成员可以忽略；第二三个成员也可以忽略；Name字段为Dll库名的指针，可以选择在导入表数据的头部添加这些数据：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506014113798.png" alt="image-20200506014113798"></p>
+<p>Dll名的FA为0x28A00，继续转为RVA=0x2AA00，以及函数名的FA为0x28A10，那么其RVA就是0x2AA10，最后一个成员为IAT表项，还是找个空白的地方，IAT表项可以暂时存放函数名地址，并且IAT表项换算成RVA后存入结构体的最后一个成员，最后的导入表项就为：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506014527340.png" alt="image-20200506014527340"></p>
+<p>到这里我们就把准备工作做好了，因为我们要注入的函数是MessageBox，这里我们通过OD修改程序调用MessageBox函数处的代码，将调用该函数修改为我们的函数；程序加载到内存中后，会将我们函数的VA存放到FA为0x289F0的地址下，转换为RVA后为0x2A9F0，加上ImageBase后为0x42A9F0。</p>
+<p>修改源程序调用MessageBox函数如下：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506010933698.png" alt="image-20200506010933698"></p>
+<p>VA为0x42A9F0下存放的是我们dll的ShowMsg函数地址，即IAT表下ShowMsg函数的地址：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011025898.png" alt="image-20200506011025898"></p>
+<p>将上面的MessageBox的地址替换为该地址：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011242743.png" alt="image-20200506011242743"></p>
+<p>替换后Dll的ShowMsg函数就注入到程序中去了，保存该补丁到新可执行文件下后双击运行该文件试试：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011512520.png" alt="image-20200506011512520"></p>
+<p>OD打开该可执行文件查看反汇编：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506011607119.png" alt="image-20200506011607119">已经成功注入并且可以运行了。</p>
+<h3 id="最小可执行文件"><a href="#最小可执行文件" class="headerlink" title="最小可执行文件"></a>最小可执行文件</h3><p>复制DOS头和NT头（不包含数据目录）到新的可执行文件下，并且将不重要的数据置A（这些数据可以供我们使用）：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506024747822.png" alt="image-20200506024747822"></p>
+<p>修改了SectionAlignment和FileAlignmet都为4（XP系统下可以，但是win7/10是不行的），然后剪切NT头部到第4个字节后粘贴：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/image-20200506025004510.png" alt="image-20200506025004510"></p>
+<p>DOS头部包含了NT头部部分数据，并且Dos头部最后一个成员表明NT头的开始处，值为0x4，也就是NT头部从0x4处开始，且该值就是内存对齐值。</p>
+<h3 id="无效的导入表项"><a href="#无效的导入表项" class="headerlink" title="无效的导入表项"></a>无效的导入表项</h3><p>操作系统装载可执行文件时首先检查导入表项的IAT成员是否为0，如果不为0，就去检查IAT指向的目标是否有效（为0就无效），如果有效，就去找动态库名开始LoadLibrary，接着去遍历函数名表，通过GetProcAddress一个个加载函数名的VA到IAT表下；如果无效，就Continue继续加载下一个导入表项，并且程序不会装载该Dll了，但是有些调试器还是会去装载该Dll的导出函数，这就可以导致反调试，实际上如果系统不去装载该Dll，那么系统就不会去装载该Dll的导出函数，但是调试器却去装载了，那么就说明被调试了。OD是有这个问题的，不过后面海峰插件解决了这个问题。</p>
+<p>但是如果</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PE/" rel="tag"># PE</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/" rel="next" title="PE格式04">
+                <i class="fa fa-chevron-left"></i> PE格式04
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F06/" rel="prev" title="PE格式06">
+                PE格式06 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Joshua</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过导入表项注入Dll"><span class="nav-number">1.</span> <span class="nav-text">通过导入表项注入Dll</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最小可执行文件"><span class="nav-number">2.</span> <span class="nav-text">最小可执行文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无效的导入表项"><span class="nav-number">3.</span> <span class="nav-text">无效的导入表项</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Joshua</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

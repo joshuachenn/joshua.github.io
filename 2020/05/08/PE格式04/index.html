@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一个简单的壳未脱壳的程序代码： 12345678910.data    g_szHello db &#39;Hello World!&#39;, 0    g_szTitle db &#39;Hello&#39;, 0.code_main:        invoke MessageBox, NULL, offset g_szHello, offset g_szTitle, MB_OK    in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PE格式04">
+<meta property="og:url" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一个简单的壳未脱壳的程序代码： 12345678910.data    g_szHello db &#39;Hello World!&#39;, 0    g_szTitle db &#39;Hello&#39;, 0.code_main:        invoke MessageBox, NULL, offset g_szHello, offset g_szTitle, MB_OK    in">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000610677.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000813979.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000903186.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502001305112.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502001425869.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502003934558.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004245855.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004353581.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004552852.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502005258597.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004653383.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004826961.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502132608045.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502132801976.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502132850825.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502141842876.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502143659416.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502145049910.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502155854764.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502112658987.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502160040566.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502163157867.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502161926039.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502163305711.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502163339713.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502175113778.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502175207459.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502175233049.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502180238859.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502233053550.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503000049437.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502235658559.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503015702212.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503015900994.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503022406592.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503023002031.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503023156622.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503023706719.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503025228980.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503034320928.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503034503057.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503034810893.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503035220552.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503035816691.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503035925179.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040251655.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040434907.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040549122.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040743828.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040909647.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503041148622.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503041220394.png">
+<meta property="og:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503041339116.png">
+<meta property="article:published_time" content="2020-05-08T05:40:15.000Z">
+<meta property="article:modified_time" content="2020-05-08T05:43:25.994Z">
+<meta property="article:author" content="Joshua">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000610677.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://joshua.github.io/2020/05/08/PE格式04/"/>
+
+
+
+
+
+  <title>PE格式04 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/%20" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://joshua.github.io/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Joshua">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PE格式04</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-08T13:40:15+08:00">
+                2020-05-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="一个简单的壳"><a href="#一个简单的壳" class="headerlink" title="一个简单的壳"></a>一个简单的壳</h3><p>未脱壳的程序代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.data</span><br><span class="line">    g_szHello db &#39;Hello World!&#39;, 0</span><br><span class="line">    g_szTitle db &#39;Hello&#39;, 0</span><br><span class="line">.code</span><br><span class="line">_main:</span><br><span class="line">    </span><br><span class="line">    invoke MessageBox, NULL, offset g_szHello, offset g_szTitle, MB_OK</span><br><span class="line">    invoke ExitProcess, 0</span><br><span class="line">    ret</span><br><span class="line">end _main</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<p>编译链接成可执行文件后使用ida打开：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000610677.png" alt="image-20200502000610677"></p>
+<p>使用winhex打开可执行文件，定位到代码段(.text)后，对IMAGE_SECTION_HEADER头部指定的VirtualSize个字节的每一个字节异或上0x90后保存，再使用ida打开查看反汇编：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000813979.png" alt="image-20200502000813979"></p>
+<p>这个时候代码已经不能运行了，因为这个时候代码字节已经被简单加密过了，使用OllyDbg打开也是一样的效果：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502000903186.png" alt="image-20200502000903186"></p>
+<p>如果希望能正确执行代码，则有必要对代码字节进行解密，就需要再异或一遍0x90，查看代码段的RVA和FA：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502001305112.png" alt="image-20200502001305112"></p>
+<p>代码段的RVA在0x1000处，FA在0x400，代码字节数为0x28，查看可执行文件0x400的位置：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502001425869.png" alt="image-20200502001425869"></p>
+<p>如何让壳程序可以正常运行，而且还不能被正常调试呢？运行前程序肯定是壳状态，可以在启动时对启动处的代码做解密，解密完之后再跳回到原程序入口点OEP。机器字节码从0x400到0x428共占用0x28个字节，因此我们可以选择在0x430处开始编写脱壳程序，并在脱完壳之后跳回到程序入口点0x401000处执行程序。</p>
+<p>文件的0x430处加载到内存中的位置应该在0x401030处，使用x64dbg修改程序代码：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502003934558.png" alt="image-20200502003934558">这段代码为手动添加，功能是从程序入口处0x401000处开始遍历0x28个字节，将每个字节异或，异或完成后跳转到0x401000处的位置开始执行程序，所以我们需要将程序的入口点位置修改为0x401030，那么RVA就是0x1030，原可执行文件的VirtualAddress需要从0x1000修改为0x1030：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004245855.png" alt="image-20200502004245855"></p>
+<p>并且还需要将手动增加的字节码添加到可执行文件的0x430处：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004353581.png" alt="image-20200502004353581"></p>
+<p>也可以使用x64dbg右键-&gt;补丁，全选后导出补丁文件后，我们手动在x64dbg的0x401030处新增的代码就会自动填充到新导出补丁文件的0x430处：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004552852.png" alt="image-20200502004552852"></p>
+<p>另外还需要注意的是我们的补丁代码修改了代码段的数据，而代码段默认的内存属性是可读可执行，那么就有必要修改代码段的内存属性，这里为方便起见，直接修改PE头代码段的characteristics属性为0xF0：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502005258597.png" alt="image-20200502005258597"></p>
+<p>使用x64dbg调试这个新的补丁可执行文件：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004653383.png" alt="image-20200502004653383"></p>
+<p>可以发现入口地址已经被修改为我们的代码地址，执行完这段代码后将0x401000处的字节码序列异或回0x90，并异或完成之后就跳回到了0x401000处开始执行代码，双击这个补丁文件：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502004826961.png" alt="image-20200502004826961"></p>
+<p>但是未经脱壳的源程序是无法运行的。</p>
+<h3 id="内存dump"><a href="#内存dump" class="headerlink" title="内存dump"></a>内存dump</h3><p>如果要调试经过加壳了的代码，但是因为入口点EP已经不是真正的入口点OEP了，而是变成了解密真正入口点代码的代码入口点，如果解密代码很短小，那很好办，但是解密代码很多很复杂的话光看反汇编已经不能解决问题了。</p>
+<p>假设这个时候知道OEP在哪，我们就可以调试运行加壳程序，比如上面的那个加壳程序：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502132608045.png" alt="image-20200502132608045"></p>
+<p>此时EP指向0x401030，而这里我们知道OEP是0x401000，因为最后这段代码跳回的就是0x401000，而一般获取到ImageBase之后，默认的OEP就是ImageBase+0x1000（一个内存页），去该地址看看反汇编：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502132801976.png" alt="image-20200502132801976"></p>
+<p>这是经过加密的入口点代码，断点断在0x401041处后F9运行代码，继续查看反汇编：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502132850825.png" alt="image-20200502132850825"></p>
+<p>此时0x401000处的代码字节已经经过解密了，也就是此时在内存中的程序代码是可执行程序的代码，打开WinHex，选择打开RAM，选择调试运行的程序查看0x401000处的数据：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502141842876.png" alt="image-20200502141842876"></p>
+<p>可执行程序的代码是经过解密且可执行的，这个时候我们可以新建一个空白的文件，暂且命名为PE_dumpUnpack.exe，我们希望将内存中的有效代码数据复制到这个可执行文件当中，这一过程就叫<strong>内存dump</strong>。dump前还需要明确哪些数据需要dump到新的空白可执行文件当中，为了程序被操作系统认可，首先得有PE头，PE头一般在ImageBase处，这里就是0x40000：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502143659416.png" alt="image-20200502143659416"></p>
+<p>头的大小是0x400个字节，首先将0x400000处开始的0x400个字节复制到新的可执行文件当中，接着将所有节的数据从内存中拷贝到可执行文件中：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502145049910.png" alt="image-20200502145049910"></p>
+<p>红框表示节在内存中的RVA，蓝框标出的是在文件中的FA，也就是说要从ImageBase+RVA处的内从拷贝字节到FA处，拷贝多少字节呢？SectionHeader的SizeOfRawData有指明，这里都是0x200，依次将数据按照此规则拷入到新的可执行文件，另外还要修改OEP为0x1000而不是解密代码的EP–0x1030：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502155854764.png" alt="image-20200502155854764"></p>
+<p>需要注意的是使用OllyICE下断点调试某程序，同时用WinHex打开该程序，在WinHex下复制断点处字节码时会有0xcc，这是因为调试器下断点使用的0xcc下断点，自然，复制的数据是有误的。因此，如果要在内存中dump数据，有必要将断点清除：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502112658987.png" alt="image-20200502112658987"></p>
+<p>保存后，双击新的可执行文件：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502160040566.png" alt="image-20200502160040566"></p>
+<p>这样，就完成了脱壳文件的手工dump过程。</p>
+<p>其实OD有dump插件，可以自动dump脱壳可执行文件：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502163157867.png" alt="image-20200502163157867"></p>
+<p>入口点设置回0x1000，后选择dump就可以了，最后dump出来的可执行文件用010editor看一下：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502161926039.png" alt="image-20200502161926039"></p>
+<p>OD调试该程序，会发现程序入口点就在0x401000：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502163305711.png" alt="image-20200502163305711"></p>
+<p>但是dump出来的每个节在文件和内存中都以0x1000对齐。</p>
+<p>运行这个dump程序：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502163339713.png" alt="image-20200502163339713"></p>
+<h3 id="内存dump的误区"><a href="#内存dump的误区" class="headerlink" title="内存dump的误区"></a>内存dump的误区</h3><p>因为程序需要脱壳，经过脱壳后dump的可执行程序可以对其进行调试。而脱壳前是执行了代码的，而一旦执行了代码可能会修改源程序数据，可能会导致脱壳后程序行为与脱壳前的程序行为不一致。</p>
+<p>如有下面程序：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> g_num = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"g_num=%d\n"</span>, g_num++);</span><br><span class="line">	&#125;</span><br><span class="line">	system(<span class="string">"pause"</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行程序后：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502175113778.png" alt="image-20200502175113778"></p>
+<p>使用OD调试运行该可执行文件：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502175207459.png" alt="image-20200502175207459"></p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502175233049.png" alt="image-20200502175233049"></p>
+<p>F9运行程序后dump出可执行程序，双击运行：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502180238859.png" alt="image-20200502180238859"></p>
+<p>这是因为执行完程序后dump，dump的全局数据已经被修改了，如果希望跟源程序一样，那么只能将脱壳前的可执行文件的.data节处的数据原封不动地复制到dump出来的.data处，才可以解决这个问题。</p>
+<h3 id="导入表"><a href="#导入表" class="headerlink" title="导入表"></a>导入表</h3><p>前面我们在介绍NT_OPTIONAL_HEADER时还有一项没有讲，那就是最后一项DataDirectory数据目录：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_OPTIONAL_HEADER</span> &#123;</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// Standard fields.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">    WORD    Magic;</span><br><span class="line">    BYTE    MajorLinkerVersion;</span><br><span class="line">    BYTE    MinorLinkerVersion;</span><br><span class="line">    DWORD   SizeOfCode;</span><br><span class="line">    DWORD   SizeOfInitializedData;</span><br><span class="line">    DWORD   SizeOfUninitializedData;</span><br><span class="line">    DWORD   AddressOfEntryPoint;</span><br><span class="line">    DWORD   BaseOfCode;</span><br><span class="line">    DWORD   BaseOfData;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// NT additional fields.</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line"></span><br><span class="line">    DWORD   ImageBase;</span><br><span class="line">    DWORD   SectionAlignment;</span><br><span class="line">    DWORD   FileAlignment;</span><br><span class="line">    WORD    MajorOperatingSystemVersion;</span><br><span class="line">    WORD    MinorOperatingSystemVersion;</span><br><span class="line">    WORD    MajorImageVersion;</span><br><span class="line">    WORD    MinorImageVersion;</span><br><span class="line">    WORD    MajorSubsystemVersion;</span><br><span class="line">    WORD    MinorSubsystemVersion;</span><br><span class="line">    DWORD   Win32VersionValue;</span><br><span class="line">    DWORD   SizeOfImage;</span><br><span class="line">    DWORD   SizeOfHeaders;</span><br><span class="line">    DWORD   CheckSum;</span><br><span class="line">    WORD    Subsystem;</span><br><span class="line">    WORD    DllCharacteristics;</span><br><span class="line">    DWORD   SizeOfStackReserve;</span><br><span class="line">    DWORD   SizeOfStackCommit;</span><br><span class="line">    DWORD   SizeOfHeapReserve;</span><br><span class="line">    DWORD   SizeOfHeapCommit;</span><br><span class="line">    DWORD   LoaderFlags;</span><br><span class="line">    DWORD   NumberOfRvaAndSizes;</span><br><span class="line">    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];</span><br><span class="line">&#125; IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;</span><br></pre></td></tr></table></figure>
+
+<p>数据目录由固定16个IMAGE_DATA_DIRECTORY结构体构成一个数组，看看IMAGE_DATA_DIRECTORY结构体：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_DATA_DIRECTORY</span> &#123;</span></span><br><span class="line">    DWORD   VirtualAddress;</span><br><span class="line">    DWORD   Size;</span><br><span class="line">&#125; IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;</span><br></pre></td></tr></table></figure>
+
+<p>数据目录数组的每一个元素有其定义，定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_EXPORT          0   <span class="comment">// 导出目录</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_IMPORT          1   <span class="comment">// 导入目录</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_RESOURCE        2   <span class="comment">// 资源目录</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_EXCEPTION       3   <span class="comment">// 异常目录</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_SECURITY        4   <span class="comment">// Security Directory</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_BASERELOC       5   <span class="comment">// Base Relocation Table</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_DEBUG           6   <span class="comment">// 调试目录</span></span></span><br><span class="line"><span class="comment">//      IMAGE_DIRECTORY_ENTRY_COPYRIGHT       7   // (X86 usage)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_ARCHITECTURE    7   <span class="comment">// Architecture Specific Data</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_GLOBALPTR       8   <span class="comment">// RVA of GP</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_TLS             9   <span class="comment">// TLS Directory</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG    10   <span class="comment">// Load Configuration Directory</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT   11   <span class="comment">// Bound Import Directory in headers</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_IAT            12   <span class="comment">// IAT表</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT   13   <span class="comment">// Delay Load Import Descriptors</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR 14   <span class="comment">// COM Runtime descriptor</span></span></span><br></pre></td></tr></table></figure>
+
+<p>使用WinHex打开用于测试的简单可执行文件，查看位于NumberOfRvaAndSizes字段后SECTION_HEADERS之前的部分就是数据目录：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502233053550.png" alt="image-20200502233053550"></p>
+<p>位于第1项的是导入表，其VirtualAddress即RVA是0x2010，Size是0x3C，查节表可以发现0x2010位于第二个节区，第二个节区的文件偏移在0x600处，那么导入表就相应在0x2010 - 0x2000 + 0x600 = 0x610处：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503000049437.png" alt="image-20200503000049437"></p>
+<p>尝试把数据目录的第12项抹掉，即把IAT表抹掉，抹掉前源程序代码如下：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200502235658559.png" alt="image-20200502235658559"></p>
+<p>抹掉后反汇编依然是这样的，这说明程序的正常运行不依赖IAT表，其实依赖的是第一项的导入表：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503015702212.png" alt="image-20200503015702212"></p>
+<p>导入表的RVA是0x2010，导入表的信息在文件偏移FA=0x610处，查看之：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503015900994.png" alt="image-20200503015900994"></p>
+<p>导入表的结构体声明如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_IMPORT_DESCRIPTOR</span> &#123;</span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        DWORD   Characteristics;            <span class="comment">// 0 for terminating null import descriptor</span></span><br><span class="line">        DWORD   OriginalFirstThunk;         <span class="comment">// RVA to original unbound IAT (PIMAGE_THUNK_DATA)</span></span><br><span class="line">    &#125; DUMMYUNIONNAME;</span><br><span class="line">    DWORD   TimeDateStamp;                  <span class="comment">// 0 if not bound,</span></span><br><span class="line">    <span class="comment">// -1 if bound, and real date\time stamp</span></span><br><span class="line">    <span class="comment">//     in IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT (new BIND)</span></span><br><span class="line">    <span class="comment">// O.W. date/time stamp of DLL bound to (Old BIND)</span></span><br><span class="line"></span><br><span class="line">    DWORD   ForwarderChain;                 <span class="comment">// -1 if no forwarders</span></span><br><span class="line">    DWORD   Name;</span><br><span class="line">    DWORD   FirstThunk;                     <span class="comment">// RVA to IAT (if bound this IAT has actual addresses)</span></span><br><span class="line">&#125; IMAGE_IMPORT_DESCRIPTOR;</span><br><span class="line"><span class="keyword">typedef</span> IMAGE_IMPORT_DESCRIPTOR UNALIGNED *PIMAGE_IMPORT_DESCRIPTOR;</span><br></pre></td></tr></table></figure>
+
+<p>第一个成员是一个联合体，Characteristics成员可以忽略，一般使用OriginalFirstThunk字段，这个字段指向一个包含了一系列结构的数组，指向的数组中的每个结构定义了一个导入函数的信息，最后以一个全0的结构作为结束，简称桥1。指向的数组中每一项为一个结构，此结构名称为IMAGE_THUNK_DATA：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_THUNK_DATA32</span> &#123;</span></span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        DWORD ForwarderString;      <span class="comment">// PBYTE </span></span><br><span class="line">        DWORD Function;             <span class="comment">// PDWORD</span></span><br><span class="line">        DWORD Ordinal;</span><br><span class="line">        DWORD AddressOfData;        <span class="comment">// PIMAGE_IMPORT_BY_NAME</span></span><br><span class="line">    &#125; u1;</span><br><span class="line">&#125; IMAGE_THUNK_DATA32;</span><br></pre></td></tr></table></figure>
+
+<p>该结构在不同时刻拥有不同的解释，一般有两项解释：</p>
+<ul>
+<li><p>取成员Ordinal，此时最高位为0，表示导入的符号是一个序号，该需要为函数RVA，缺点是不同平台的RVA可能不一样，有点是不需要额外存放函数名，节省了空间；</p>
+</li>
+<li><p>取成员AddressOfData，此时最高位为1，表示导入符号是一个名称，该值指向一个结构体，该结构体定义如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">IMAGE_IMPORT_BY_NAME</span> &#123;</span></span><br><span class="line">    WORD    Hint;</span><br><span class="line">    CHAR   Name[<span class="number">1</span>];</span><br><span class="line">&#125; IMAGE_IMPORT_BY_NAME, *PIMAGE_IMPORT_BY_NAME;</span><br></pre></td></tr></table></figure>
+
+<p>hint成员为符号序号，可以忽略，仅做参考，第二个成员是个柔性数组，存放符号名字符串。</p>
+</li>
+</ul>
+<p>对照WinHex打开可执行文件的导入表位置0x610处：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503022406592.png" alt="image-20200503022406592"></p>
+<p>一个导入表结构体占0x14即20个字节（5个DWORD类型成员），在WinHex下每个导入表项占用一行4个字节，最后一个导入表项为0，因此这里的导入表有两项，先看第一个导入表项：</p>
+<p>第一个成员值为0x00002054，是个RVA，转为FA即为0x654，该地址下存放的是一系列的IMAGE_THUNK_DATA结构体，以0作为结构体数组的结尾：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503023002031.png" alt="image-20200503023002031"></p>
+<p>说明只有一项IMAGE_THUNK_DATA结构体，其值为0x0000205C，最高位为0，那么该值指向的就是IMAGE_IMPORT_BY_NAME结构体，换算成FA就是0x65C，查看之：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503023156622.png" alt="image-20200503023156622"></p>
+<p>深色部分就是整个结构体数据，头两个字节为0x1B1，表示符号序号，可以忽略，重要的是其后面的字节直到0结尾的部分，ASCII码表示<strong>MessageBoxA</strong>，即为符号名。</p>
+<p>第二个第三个成员不重要，仅用作参考。</p>
+<p>第四个成员Name字段则是符号所在的模块名称，这里的值是0x0000206A，换算成FA即为0x66A：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503023706719.png" alt="image-20200503023706719"></p>
+<p>从0x66A处开始直到0结尾就表示符号所在的模块，这里是user32.dll，说明上面的函数需要通过这个动态库来加载，可以对该名称进行修改，把”.dll”删除也可以，前提是要填0，让系统知道字符串结尾，系统在loaddll的时候会自动补上”.dll”，否则会让系统找不到库。</p>
+<p>与第一个成员相同，指向的链表定义了针对Name成员这个动态库引入的所有导入函数，简称桥2：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503025228980.png" alt="image-20200503025228980"></p>
+<h3 id="程序加载符号过程"><a href="#程序加载符号过程" class="headerlink" title="程序加载符号过程"></a>程序加载符号过程</h3><p>使用OD调试运行目标程序，系统首先将程序加载入模块基址（默认0x400000），前一个内存分页保存的是NT头信息，包含了导入表：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503034320928.png" alt="image-20200503034320928"></p>
+<p>系统找到导入表的位置的RVA是0x2010，那么VA就是0x402010，遍历0x402010处的导入表：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503034503057.png" alt="image-20200503034503057"></p>
+<p>每一个导入表项占20个字节，首先解析第一个导入表项的Name字段，获取模块名：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503034810893.png" alt="image-20200503034810893"></p>
+<p>Name字段的RVA是0x206A，VA就是0x40206A，在该地址下获取到模块名为user32.dll，通过LoadLibrary函数加载该Dll；接着通过第一个成员拿IMAGE_THUNK_DATA结构体数组，该结构体数组包含了函数名数组，同一个dll下导入的函数：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503035220552.png" alt="image-20200503035220552"></p>
+<p>第一个成员的RVA是0x2054，VA就是0x402054，这个数组以0结尾，那么只有一个函数需要导入，导入的是符号序号还是符号信息结构体看最高位，这里的值是0x0000205C，最高位为0，那么这个值就是包含函数名信息的IMAGE_IMPORT_BY_NAME结构体，该结构体地址即VA为0x40205C（蓝框标出），忽略头两个字节，这个函数名为MessageBoxA，通过刚才加载的Dll，获取Dll的句柄通过GetProcAddress函数，获取到该函数在加载到程序中的地址，并且将该地址存放到最后一个成员地址下：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503035816691.png" alt="image-20200503035816691"></p>
+<p>这里最后一个成员即FirstThunk为0x2008，那么VA就是0x402008：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503035925179.png" alt="image-20200503035925179"></p>
+<p>这个地方就存放了函数加载到程序中的真实地址，如果还需要从该Dll中加载函数，加载出来的函数继续往后面存放，如果没有函数需要加载了，那么最后补零就可以了。</p>
+<p>在反汇编窗口查看0x73491CC0处的代码：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040251655.png" alt="image-20200503040251655"></p>
+<p>这就是MessageBoxA的实现了；</p>
+<p>这样从一个Dll加载函数就完成了。</p>
+<p>紧接着，系统开始遍历第二个导入表项，首先取出需要加载的Dll：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040434907.png" alt="image-20200503040434907"></p>
+<p>Dll名信息的RVA在0x2084处，VA为0x402084下：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040549122.png" alt="image-20200503040549122"></p>
+<p>需要加载的Dll名为”kernel32.dll”，通过LoadLibrary加载该dll获取dll句柄，接着从第一个成员处获取需要加载的函数符号名数组，RVA为0x204C，VA为0x40204C:</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040743828.png" alt="image-20200503040743828"></p>
+<p>同样，该数组只有一个元素，那么说明只有一个函数需要在该dll中被加载，去RVA为0x2076的地址中获取函数名信息，同样需要换算成VA，为0x402076：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503040909647.png" alt="image-20200503040909647"></p>
+<p>前两个字节忽略，获取到的函数名”ExitProcess”，用已经获取的dll句柄通过GetProcAddress获取该函数加载到程序中的地址，然后存放入最后一个成员中，当然还是以数组的形式一直往该地址后面填充，最后一个成员的RVA为0x2000，那么VA为0x402000：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503041148622.png" alt="image-20200503041148622"></p>
+<p>查看该地址处的反汇编：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503041220394.png" alt="image-20200503041220394"></p>
+<p>这样又一个导入表项的所有应该导入的函数就被导入到进程的虚拟地址空间中了。</p>
+<p>接着系统又去导入表取出下一个导入表项：</p>
+<p><img src="/2020/05/08/PE%E6%A0%BC%E5%BC%8F04/image-20200503041339116.png" alt="image-20200503041339116"></p>
+<p>但是会发现，最后一个是空的，那么就表示所有导入表项都已经加载到虚拟地址空间中了。</p>
+<p><u>因为导入表项的结构体最后加载到内存中后，第一个成员会被函数在内存中的VA替换掉，因此其实我们可以抹掉导入表的第一个成员，程序也是可以正常运行的。</u></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F03/" rel="next" title="PE格式03">
+                <i class="fa fa-chevron-left"></i> PE格式03
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/05/08/PE%E6%A0%BC%E5%BC%8F05/" rel="prev" title="PE格式05">
+                PE格式05 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Joshua</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%20%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一个简单的壳"><span class="nav-number">1.</span> <span class="nav-text">一个简单的壳</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存dump"><span class="nav-number">2.</span> <span class="nav-text">内存dump</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存dump的误区"><span class="nav-number">3.</span> <span class="nav-text">内存dump的误区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#导入表"><span class="nav-number">4.</span> <span class="nav-text">导入表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#程序加载符号过程"><span class="nav-number">5.</span> <span class="nav-text">程序加载符号过程</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Joshua</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Pisces</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
